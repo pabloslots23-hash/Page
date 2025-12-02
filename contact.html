@@ -176,8 +176,39 @@
     <script>
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('¡Mensaje enviado! Te responderemos en breve.');
-            this.reset();
+            
+            // Referencia al botón para mostrar estado de carga
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'Enviando...';
+            submitBtn.disabled = true;
+
+            // Recopilar datos del formulario
+            const formData = new FormData(this);
+
+            // Enviar petición al servidor PHP
+            fetch('php/contact-form.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('¡Mensaje enviado! Te responderemos en breve.');
+                    this.reset();
+                } else {
+                    alert('Error: ' + (data.error || 'Ocurrió un error al enviar el mensaje.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error de conexión o en el servidor. Por favor, inténtalo de nuevo.');
+            })
+            .finally(() => {
+                // Restaurar botón
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            });
         });
     </script>
 </body>
